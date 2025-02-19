@@ -1,8 +1,10 @@
 #!/usr/bin/bash
 
-API_URL="https://pokeapi.co/api/v2/pokemon/"
-TYPE="application/json"
+BASE_URL="https://pokeapi.co/api/v2/pokemon"
 POKEMON="pikachu"
+
+API_URL="$BASE_URL/$POKEMON"
+TYPE="application/json"
 
 handle_response() {
   if [[ $1 =~ ^2[0-9][0-9]$ ]]; then
