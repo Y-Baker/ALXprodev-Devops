@@ -13,3 +13,4 @@ HEIGHT=$(jq '.height' $INPUT_FILE | awk '{print $1/10}')
 WEIGHT=$(jq '.weight' $INPUT_FILE | awk '{print $1/10}')
 
 echo "$NAME is of type $TYPE, weighs ${WEIGHT}kg, and is ${HEIGHT}m tall."
+# $name is of type $type, weighs ${formatted_weight}kg, and is ${formatted_height}m tall.
