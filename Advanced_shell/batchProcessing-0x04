@@ -1,0 +1,69 @@
+#!/usr/bin/bash
+
+POKEMONS=("bulbasaur" "ivysaur" "venusaur" "charmander" "charmeleon")
+BASE_URL="https://pokeapi.co/api/v2/pokemon"
+TYPE="application/json"
+DIR="temp"
+ERROR_FILE="$DIR/errors.txt"
+MAX_RETRIES=3
+FLAG=true
+
+mkdir -p "$DIR"
+
+handle_error() {
+    echo "[$(date)]: $1" >> $ERROR_FILE
+    FLAG=false
+}
+
+trap 'handle_error "An unexpected error occurred!"' ERR
+
+handle_response() {
+    if [[ $1 =~ ^2[0-9][0-9]$ ]]; then
+        return 0
+    else
+        return 1
+    fi
+}
+
+handle_fetch() {
+    local POKEMON="$1"
+    local API_URL="$BASE_URL/$POKEMON"
+    local OUTPUT_FILE="$DIR/$POKEMON.json"
+
+    local ATTEMPTS=0
+    local SUCCESS=false
+
+    # echo "START $POKEMON"
+    while [[ $ATTEMPTS -lt $MAX_RETRIES ]]; do
+        ((ATTEMPTS++))
+
+        RESPONSE=$(curl -X GET -s -w "%{http_code}" -o "$OUTPUT_FILE" -H "accept: $TYPE" "$API_URL")
+
+        if handle_response "$RESPONSE"; then
+            SUCCESS=true
+            break
+        else
+            echo "Attempt $ATTEMPTS failed with HTTP Status Code $RESPONSE"
+            sleep 0.5
+        fi
+    done
+
+    if ! $SUCCESS; then
+        echo "Failed to fetch $POKEMON after $MAX_RETRIES attempts. Skipping..."
+        handle_error "Failed to fetch data for $POKEMON after $MAX_RETRIES attempts. HTTP Status Code: $RESPONSE"
+        rm -f "$OUTPUT_FILE"
+    fi
+
+    # echo "END $POKEMON"
+}
+
+for POKEMON in "${POKEMONS[@]}";
+do
+    handle_fetch "$POKEMON" &
+done
+
+wait
+
+if $FLAG; then
+    echo "Successfully fetched data"
+fi
