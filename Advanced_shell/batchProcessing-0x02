@@ -43,6 +43,7 @@ handle_fetch() {
 for POKEMON in "${POKEMONS[@]}";
 do
     handle_fetch "$POKEMON"
+    sleep 0.5
 done
 
 if $FLAG; then
