@@ -6,10 +6,8 @@ POKEMON="pikachu"
 
 handle_response() {
   if [[ $1 =~ ^2[0-9][0-9]$ ]]; then
-    echo "Success"
     return 0
   else
-    echo "Error"
     return 1
   fi
 }
