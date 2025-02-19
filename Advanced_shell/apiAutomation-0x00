@@ -1,0 +1,32 @@
+#!/usr/bin/bash
+
+API_URL="https://pokeapi.co/api/v2/pokemon/"
+TYPE="application/json"
+POKEMON="pikachu"
+
+handle_response() {
+  if [[ $1 =~ ^2[0-9][0-9]$ ]]; then
+    echo "Success"
+    return 0
+  else
+    echo "Error"
+    return 1
+  fi
+}
+
+handle_error() {
+  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')]: $1" >> errors.txt
+  exit 1
+}
+
+trap 'handle_error "An unexpected error occurred!"' ERR
+
+RESPONSE=$(curl -X GET -w "%{http_code}" "$API_URL" -H "accept: $TYPE" -o data.json)
+
+
+if handle_response $RESPONSE; then
+  echo "Successfully fetched data"
+else
+  echo "Failed to fetch data with HTTP Status Code $RESPONSE"
+  rm -rf data.json
+fi
